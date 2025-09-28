@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <header class="top-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo">
+        </div>
+        <div class="header-center">
+            <h1>Beeah Accommodation System</h1>
+            <p class="header-subtitle">Managed by Wekaya</p>
+        </div>
+        <div class="header-right">
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+            <button class="lang-toggle">Language Toggle</button>
+            <a href="{{ url_for('auth_bp.logout') }}" class="logout-link">Logout</a>
+        </div>
+    </header>
+
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li class="active"><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Asset reports</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Store Record</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Contracts</a></li>
+                <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+        
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flash-message">{{ messages[0][1] }}</div>
+              {% endif %}
+            {% endwith %}
+            
+            <h2>Dashboard</h2>
+
+            <section class="stats-cards">
+                <a href="{{ url_for('auth_bp.dashboard') }}" class="card-link">
+                    <div class="card">
+                        <p>Total Employees</p>
+                        <span>{{ stats.total }}</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('auth_bp.dashboard', status='Vacant') }}" class="card-link">
+                    <div class="card">
+                        <p>Total Vacant Bedspace</p>
+                        <span>{{ stats.vacant }}</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('auth_bp.dashboard', status='Vacation') }}" class="card-link">
+                    <div class="card">
+                        <p>On Vacation</p>
+                        <span>{{ stats.on_vacation }}</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('auth_bp.dashboard', status='Resigned') }}" class="card-link">
+                    <div class="card">
+                        <p>Resigned / Terminated</p>
+                        <span>{{ stats.resigned }}</span>
+                    </div>
+                </a>
+            </section>
+
+            <section class="data-section">
+                <div class="main-data">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search by SAP ID, Name...">
+                        <button>Search</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Accommodation</th>
+                                    <th>Room</th>
+                                    <th>SAP ID</th>
+                                    <th>Emp Name</th>
+                                    <th>Designation</th>
+                                    <th>Status</th>
+                                    <th>Department</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for emp in employees %}
+                                <tr>
+                                    <td>{{ emp['Accommodation'] }}</td>
+                                    <td>{{ emp['Room'] }}</td>
+                                    <td>
+                                        {% if emp['SAP ID'] %}
+                                        <a href="{{ url_for('staff_bp.staff_details', sap_id=emp['SAP ID']|int_sap) }}" class="table-link">{{ emp['SAP ID']|int_sap }}</a>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ emp['Emp Name'] }}</td>
+                                    <td>{{ emp['Designation'] }}</td>
+                                    <td>{{ emp['Status'] }}</td>
+                                    <td>{{ emp['Department'] }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">No data found for selected filter.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <aside class="summary">
+                    <h3>Accommodation Summary</h3>
+                    <ul>
+                        <li><a href="{{ url_for('auth_bp.dashboard') }}">All Locations</a> <span class="count all">{{ stats.total }}</span></li>
+                        {% for loc, count in locations.items() %}
+                        <li><a href="{{ url_for('auth_bp.dashboard', location=loc) }}">{{ loc }}</a> <span class="count">{{ count }}</span></li>
+                        {% endfor %}
+                    </ul>
+                </aside>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo">
+        </div>
+        <div class="header-center">
+            <h1>Edit User: {{ user.username }}</h1>
+        </div>
+        <div class="header-right">
+             <a href="{{ url_for('settings_bp.settings_page') }}" class="back-btn">Back to Settings</a>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+        </div>
+    </div>
+
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Asset reports</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Store Record</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Contracts</a></li>
+                <li class="active"><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <div class="settings-section">
+                <h2>Edit User Details</h2>
+                <div class="summary-section">
+                    <form class="staff-form" method="POST" action="{{ url_for('settings_bp.update_user', username=user.username) }}">
+                        <div class="form-row">
+                            <div class="form-group"><label>Username</label><input type="text" name="username" value="{{ user.username }}" readonly></div>
+                            <div class="form-group"><label>Email</label><input type="email" name="email" value="{{ user.email }}"></div>
+                        </div>
+                         <div class="form-row">
+                            <div class="form-group"><label>Password</label><input type="password" name="password" placeholder="Leave blank to keep unchanged"></div>
+                            <div class="form-group">
+                                <label>Role</label>
+                                <select name="role">
+                                    <option value="Manager" {% if user.role == 'Manager' %}selected{% endif %}>Manager</option>
+                                    <option value="Camp boss" {% if user.role == 'Camp boss' %}selected{% endif %}>Camp Boss</option>
+                                    <option value="Coordinator" {% if user.role == 'Coordinator' %}selected{% endif %}>Coordinator</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Allowed Accommodations (for Camp Boss/Coordinator)</label>
+                            <select name="allowed_accommodations" multiple size="4">
+                                {% for acc in accommodations %}
+                                <option value="{{ acc }}" {% if acc in user.allowed_accommodations %}selected{% endif %}>{{ acc }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-actions"><button type="submit" class="submit-btn">Update User</button></div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

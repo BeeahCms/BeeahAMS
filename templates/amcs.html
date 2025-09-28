@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMCs Services - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo">
+        </div>
+        <div class="header-center">
+            <h1>AMCs Services</h1>
+        </div>
+        <div class="header-right">
+             <a href="{{ url_for('auth_bp.dashboard') }}" class="back-btn">Back to Dashboard</a>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+        </div>
+    </div>
+
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li class="active"><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Asset reports</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Store Record</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Contracts</a></li>
+                <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flash-message">{{ messages[0][1] }}</div>
+              {% endif %}
+            {% endwith %}
+            
+            <button class="action-btn large-btn" id="addAmcBtn">Add new AMCs Service</button>
+
+            <div class="action-bar" style="margin-top: 20px;">
+                <form method="GET" action="{{ url_for('amcs_bp.amcs_report') }}" class="filter-form">
+                    <div class="action-group">
+                        <label>Filter by Accommodation</label>
+                        <select name="accommodation" onchange="this.form.submit()">
+                            <option value="">All Accommodations</option>
+                            {% for acc in accommodations %}
+                            <option value="{{ acc }}" {% if acc == request.args.get('accommodation') %}selected{% endif %}>{{ acc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="action-group">
+                        <label>Filter by Vendor/Supplier</label>
+                        <select name="vendor" onchange="this.form.submit()">
+                            <option value="">All Vendors</option>
+                            {% for vendor in vendors %}
+                            <option value="{{ vendor }}" {% if vendor == request.args.get('vendor') %}selected{% endif %}>{{ vendor }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="action-group">
+                        <label>Filter by Type</label>
+                        <select name="type" onchange="this.form.submit()">
+                             <option value="">All Types</option>
+                            {% for type in types %}
+                            <option value="{{ type }}" {% if type == request.args.get('type') %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <a href="{{ url_for('amcs_bp.amcs_report') }}" class="clear-filter-btn">Clear Filters</a>
+                </form>
+            </div>
+
+            <div class="table-container full-width">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Accommodation</th>
+                            <th>Vendor/Supplier Name</th>
+                            <th>Service Date</th>
+                            <th>Expiry Date</th>
+                            <th>Type</th>
+                            <th>Remarks</th>
+                            <th>Attachment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in amcs_records %}
+                        <tr>
+                            <td>{{ record.accommodation }}</td>
+                            <td>{{ record.vendor }}</td>
+                            <td>{{ record.service_date }}</td>
+                            <td>{{ record.expiry_date }}</td>
+                            <td>{{ record.type }}</td>
+                            <td>{{ record.remarks }}</td>
+                            <td>
+                                {% if record.attachment %}
+                                <a href="{{ url_for('amcs_bp.uploaded_file', filename=record.attachment) }}" class="table-link" target="_blank">View/Download</a>
+                                {% else %}
+                                No File
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7" style="text-align:center;">No AMC records found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="addAmcModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New AMC Service</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('amcs_bp.add_amc') }}" enctype="multipart/form-data">
+                    <div class="form-group full-width">
+                        <label>Accommodation Name</label>
+                        <select name="accommodation_name" required>
+                            <option value="" disabled selected>Select Accommodation</option>
+                            {% for acc in accommodations %}
+                            <option value="{{ acc }}">{{ acc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Vendor/Supplier Name</label><input type="text" name="vendor" required></div>
+                        <div class="form-group"><label>Type</label><input type="text" name="type" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Inspection/Service Date</label><input type="date" name="service_date" required></div>
+                        <div class="form-group"><label>Expiry Date</label><input type="date" name="expiry_date"></div>
+                    </div>
+                    <div class="form-group full-width"><label>Attachment (e.g., Service DO)</label><input type="file" name="attachment"></div>
+                    <div class="form-group full-width"><label>Remarks</label><textarea name="remarks" rows="3"></textarea></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Save AMC Service</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addModal = document.getElementById('addAmcModal');
+            const addBtn = document.getElementById('addAmcBtn');
+            const closeBtns = document.querySelectorAll('.modal .close-btn');
+
+            if(addBtn) { addBtn.onclick = () => { addModal.style.display = 'flex'; }; }
+
+            closeBtns.forEach(btn => {
+                btn.onclick = (e) => { e.target.closest('.modal').style.display = 'none'; };
+            });
+
+            window.onclick = (event) => {
+                if (event.target == addModal) {
+                    addModal.style.display = 'none';
+                }
+            };
+        });
+    </script>
+</body>
+</html>

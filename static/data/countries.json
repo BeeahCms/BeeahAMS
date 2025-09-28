@@ -1,0 +1,115 @@
+[
+    {
+        "name": "India",
+        "phone_code": "91",
+        "states": [
+            {"name": "Andhra Pradesh"},
+            {"name": "Delhi"},
+            {"name": "Goa"},
+            {"name": "Gujarat"},
+            {"name": "Karnataka"},
+            {"name": "Kerala"},
+            {"name": "Maharashtra"},
+            {"name": "Punjab"},
+            {"name": "Rajasthan"},
+            {"name": "Tamil Nadu"},
+            {"name": "Telangana"},
+            {"name": "Uttar Pradesh"},
+            {"name": "West Bengal"}
+        ]
+    },
+    {
+        "name": "Pakistan",
+        "phone_code": "92",
+        "states": [
+            {"name": "Punjab"},
+            {"name": "Sindh"},
+            {"name": "Khyber Pakhtunkhwa"},
+            {"name": "Balochistan"},
+            {"name": "Islamabad Capital Territory"}
+        ]
+    },
+    {
+        "name": "Bangladesh",
+        "phone_code": "880",
+        "states": [
+            {"name": "Dhaka"},
+            {"name": "Chittagong"},
+            {"name": "Khulna"},
+            {"name": "Sylhet"},
+            {"name": "Rajshahi"}
+        ]
+    },
+    {
+        "name": "Philippines",
+        "phone_code": "63",
+        "states": [
+            {"name": "Metro Manila"},
+            {"name": "Calabarzon"},
+            {"name": "Central Luzon"},
+            {"name": "Cebu"}
+        ]
+    },
+    {
+        "name": "Egypt",
+        "phone_code": "20",
+        "states": [
+            {"name": "Cairo"},
+            {"name": "Alexandria"},
+            {"name": "Giza"},
+            {"name": "Luxor"}
+        ]
+    },
+    {
+        "name": "Nepal",
+        "phone_code": "977",
+        "states": [
+            {"name": "Bagmati"},
+            {"name": "Gandaki"},
+            {"name": "Lumbini"},
+            {"name": "Koshi"}
+        ]
+    },
+    {
+        "name": "Sri Lanka",
+        "phone_code": "94",
+        "states": [
+            {"name": "Western"},
+            {"name": "Central"},
+            {"name": "Southern"}
+        ]
+    },
+    {
+        "name": "Indonesia",
+        "phone_code": "62",
+        "states": []
+    },
+    {
+        "name": "Sudan",
+        "phone_code": "249",
+        "states": []
+    },
+    {
+        "name": "Ethiopia",
+        "phone_code": "251",
+        "states": []
+    },
+    {
+        "name": "Kenya",
+        "phone_code": "254",
+        "states": []
+    },
+    {
+        "name": "United Arab Emirates",
+        "phone_code": "971",
+        "states": [
+            {"name": "Abu Dhabi"},
+            {"name": "Dubai"},
+            {"name": "Sharjah"},
+            {"name": "Ajman"},
+            {"name": "Umm Al Quwain"},
+            {"name": "Ras Al Khaimah"},
+            {"name": "Fujairah"}
+        ]
+    }
+]

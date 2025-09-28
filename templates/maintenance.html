@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Report - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo">
+        </div>
+        <div class="header-center">
+            <h1>Maintenance Report</h1>
+        </div>
+        <div class="header-right">
+             <a href="{{ url_for('auth_bp.dashboard') }}" class="back-btn">Back to Dashboard</a>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+        </div>
+    </div>
+
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li class="active"><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Asset reports</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Store Record</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Contracts</a></li>
+                <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flash-message">{{ messages[0][1] }}</div>
+              {% endif %}
+            {% endwith %}
+            
+            <button class="action-btn large-btn" id="addIssueBtn">Add Maintenance Issue</button>
+
+            <section class="stats-cards">
+                <a href="{{ url_for('maintenance_bp.maintenance_report', status='Open') }}" class="card-link">
+                    <div class="card">
+                        <p>Open Issues</p>
+                        <span>{{ stats.Open }}</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('maintenance_bp.maintenance_report', status='In-Process') }}" class="card-link">
+                    <div class="card">
+                        <p>In-Process Issues</p>
+                        <span>{{ stats['In-Process'] }}</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('maintenance_bp.maintenance_report', status='Closed') }}" class="card-link">
+                    <div class="card">
+                        <p>Closed Issues</p>
+                        <span>{{ stats.Closed }}</span>
+                    </div>
+                </a>
+                <a href="{{ url_for('maintenance_bp.maintenance_report') }}" class="card-link">
+                    <div class="card">
+                        <p>Total Issues</p>
+                        <span>{{ stats.Open + stats['In-Process'] + stats.Closed }}</span>
+                    </div>
+                </a>
+            </section>
+
+            <div class="action-bar">
+                <form id="filterForm" method="GET" action="{{ url_for('maintenance_bp.maintenance_report') }}" class="filter-form">
+                    <div class="action-group">
+                        <label>Filter by Accommodation</label>
+                        <select name="accommodation" id="filter_accommodation">
+                            <option value="">All Accommodations</option>
+                            {% for acc in accommodations %}<option value="{{ acc }}" {% if acc == request.args.get('accommodation') %}selected{% endif %}>{{ acc }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="action-group">
+                        <label>Filter by Status</label>
+                        <select name="status" id="filter_status">
+                            <option value="">All Statuses</option>
+                            <option value="Open" {% if 'Open' == request.args.get('status') %}selected{% endif %}>Open</option>
+                            <option value="In-Process" {% if 'In-Process' == request.args.get('status') %}selected{% endif %}>In-Process</option>
+                            <option value="Closed" {% if 'Closed' == request.args.get('status') %}selected{% endif %}>Closed</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="action-btn">Apply Filter</button>
+                    <a href="{{ url_for('maintenance_bp.maintenance_report') }}" class="clear-filter-btn">Clear</a>
+                </form>
+                <form method="POST" action="{{ url_for('maintenance_bp.download_maintenance_report') }}">
+                    <input type="hidden" name="hidden_accommodation" id="hidden_accommodation" value="{{ request.args.get('accommodation', '') }}">
+                    <input type="hidden" name="hidden_status" id="hidden_status" value="{{ request.args.get('status', '') }}">
+                    <button type="submit" class="submit-btn">Download Report</button>
+                </form>
+            </div>
+
+            <div class="content-body">
+                <div class="table-container full-width">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Accommodation</th>
+                                <th>Block</th>
+                                <th>Report Date</th>
+                                <th>Details</th>
+                                <th>Status</th>
+                                <th>Risk</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for issue in issues %}
+                            <tr class="data-row"
+                                data-id="{{ issue.id }}"
+                                data-accommodation="{{ issue.accommodation }}"
+                                data-block="{{ issue.block }}"
+                                data-section="{{ issue.section }}"
+                                data-report_date="{{ issue.report_date }}"
+                                data-details="{{ issue.details }}"
+                                data-status="{{ issue.status }}"
+                                data-closed_date="{{ issue.closed_date }}"
+                                data-concern="{{ issue.concern }}"
+                                data-concern_other="{{ issue.concern_other }}"
+                                data-risk="{{ issue.risk }}"
+                                data-remarks="{{ issue.remarks }}">
+                                <td>{{ issue.accommodation }}</td>
+                                <td>{{ issue.block }}</td>
+                                <td>{{ issue.report_date }}</td>
+                                <td>{{ issue.details[:50] }}...</td>
+                                <td>{{ issue.status }}</td>
+                                <td>{{ issue.risk }}</td>
+                                <td>
+                                    {% if issue.accommodation in session.get('allowed_accommodations', []) or session.get('role') in ['Admin', 'Manager'] %}
+                                    <button class="action-btn-sm edit-btn">Edit</button>
+                                    <form method="POST" action="{{ url_for('maintenance_bp.delete_issue', issue_id=issue.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this issue?');">
+                                        <button type="submit" class="danger-btn-sm">Delete</button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="7" style="text-align:center;">No maintenance issues found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="upload-section standalone">
+                    <h3>Upload Maintenance Issues</h3>
+                    <form action="{{ url_for('maintenance_bp.upload_maintenance_issues') }}" method="post" enctype="multipart/form-data">
+                        <input type="file" name="maintenance_file" required>
+                        <button type="submit" class="upload-btn">Upload Issues</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="addIssueModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Maintenance Issue</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('maintenance_bp.add_issue') }}">
+                    <div class="form-group full-width"><label>Accommodation</label><select name="accommodation" required><option value="" disabled selected>Select...</option>{% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}</select></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Block</label><input type="text" name="block" required></div>
+                        <div class="form-group"><label>Section</label><input type="text" name="section"></div>
+                        <div class="form-group"><label>Report Date</label><input type="date" name="report_date" required></div>
+                    </div>
+                    <div class="form-group full-width"><label>Details of Maintenance Work</label><textarea name="details" rows="3" required></textarea></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Status</label><select name="status" onchange="toggleClosedDate(this, 'add_closed_date')"><option value="Open">Open</option><option value="In-Process">In-Process</option><option value="Closed">Closed</option></select></div>
+                        <div class="form-group"><label>Closed Date</label><input type="date" name="closed_date" id="add_closed_date" disabled></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Concern</label><select name="concern" onchange="toggleOtherConcern(this, 'add_concern_other')"><option>Beeah Maintenance Team</option><option>Owner</option><option value="Other">Other</option></select></div>
+                        <div class="form-group"><input type="text" name="concern_other" id="add_concern_other" placeholder="Specify other concern" class="hidden"></div>
+                    </div>
+                    <div class="form-group"><label>Risk</label><select name="risk"><option>Low</option><option>Medium</option><option>High</option></select></div>
+                    <div class="form-group full-width"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Add Issue</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="editIssueModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Maintenance Issue</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editIssueForm" class="staff-form" method="POST" action="">
+                    <div class="form-group full-width"><label>Accommodation</label><select name="accommodation" id="edit_accommodation" required>{% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}</select></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Block</label><input type="text" name="block" id="edit_block" required></div>
+                        <div class="form-group"><label>Section</label><input type="text" name="section" id="edit_section"></div>
+                        <div class="form-group"><label>Report Date</label><input type="date" name="report_date" id="edit_report_date" required></div>
+                    </div>
+                    <div class="form-group full-width"><label>Details of Maintenance Work</label><textarea name="details" id="edit_details" rows="3" required></textarea></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Status</label><select name="status" id="edit_status" onchange="toggleClosedDate(this, 'edit_closed_date')"><option value="Open">Open</option><option value="In-Process">In-Process</option><option value="Closed">Closed</option></select></div>
+                        <div class="form-group"><label>Closed Date</label><input type="date" name="closed_date" id="edit_closed_date"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Concern</label><select name="concern" id="edit_concern" onchange="toggleOtherConcern(this, 'edit_concern_other')"><option>Beeah Maintenance Team</option><option>Owner</option><option value="Other">Other</option></select></div>
+                        <div class="form-group"><input type="text" name="concern_other" id="edit_concern_other" placeholder="Specify other concern" class="hidden"></div>
+                    </div>
+                    <div class="form-group"><label>Risk</label><select name="risk" id="edit_risk"><option>Low</option><option>Medium</option><option>High</option></select></div>
+                    <div class="form-group full-width"><label>Remarks</label><textarea name="remarks" id="edit_remarks" rows="2"></textarea></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Update Issue</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleClosedDate(statusSelect, dateInputId) {
+            const dateInput = document.getElementById(dateInputId);
+            dateInput.disabled = statusSelect.value !== 'Closed';
+        }
+
+        function toggleOtherConcern(concernSelect, otherInputId) {
+            const otherInput = document.getElementById(otherInputId);
+            otherInput.classList.toggle('hidden', concernSelect.value !== 'Other');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const addModal = document.getElementById('addIssueModal');
+            const editModal = document.getElementById('editIssueModal');
+            const addBtn = document.getElementById('addIssueBtn');
+            const closeBtns = document.querySelectorAll('.modal .close-btn');
+
+            if(addBtn) { addBtn.onclick = () => { addModal.style.display = 'flex'; }; }
+
+            closeBtns.forEach(btn => {
+                btn.onclick = (e) => { e.target.closest('.modal').style.display = 'none'; };
+            });
+
+            window.onclick = (event) => {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
+            
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('.data-row');
+                    const dataset = row.dataset;
+                    
+                    const form = document.getElementById('editIssueForm');
+                    form.action = `/update_issue/${dataset.id}`;
+                    
+                    document.getElementById('edit_accommodation').value = dataset.accommodation;
+                    document.getElementById('edit_block').value = dataset.block;
+                    document.getElementById('edit_section').value = dataset.section;
+                    document.getElementById('edit_report_date').value = dataset.report_date;
+                    document.getElementById('edit_details').value = dataset.details;
+                    document.getElementById('edit_status').value = dataset.status;
+                    document.getElementById('edit_closed_date').value = dataset.closed_date;
+                    document.getElementById('edit_concern').value = dataset.concern;
+                    document.getElementById('edit_concern_other').value = dataset.concern_other;
+                    document.getElementById('edit_risk').value = dataset.risk;
+                    document.getElementById('edit_remarks').value = dataset.remarks;
+
+                    toggleClosedDate(document.getElementById('edit_status'), 'edit_closed_date');
+                    toggleOtherConcern(document.getElementById('edit_concern'), 'edit_concern_other');
+                    
+                    editModal.style.display = 'flex';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

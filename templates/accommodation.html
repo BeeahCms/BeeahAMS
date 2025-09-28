@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accommodation Data - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-left">
+            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo">
+        </div>
+        <div class="header-center">
+            <h1>Accommodation Data</h1>
+        </div>
+        <div class="header-right">
+             <a href="{{ url_for('auth_bp.dashboard') }}" class="back-btn">Back to Dashboard</a>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+        </div>
+    </div>
+
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li class="active"><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Asset reports</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Store Record</a></li>
+                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Contracts</a></li>
+                <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <div class="action-bar">
+                <form method="GET" action="{{ url_for('acc_bp.accommodation_data') }}" class="action-group">
+                    <label>Select Accommodation</label>
+                    <select name="accommodation" onchange="this.form.submit()">
+                        <option value="">-- All --</option>
+                        {% for acc in accommodations %}
+                        <option value="{{ acc }}" {% if acc == selected_acc %}selected{% endif %}>{{ acc }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <button class="action-btn" id="addStaffBtn">Add New Staff</button>
+                <button class="action-btn" id="downloadDataBtn">Download Data</button>
+                <button class="action-btn" id="addAccomBtn">Add New Accommodation</button>
+                <button class="action-btn" id="manageAccomBtn">Manage Accommodations</button>
+            </div>
+
+            <div class="content-body">
+                <div class="summary-section">
+                    <h3>Summary by Department</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department Name</th>
+                                <th>Headcount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dept, count in department_summary.items() %}
+                            <tr>
+                                <td>{{ dept }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2" style="text-align: center;">Select an accommodation to see summary.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="upload-section">
+                    <h3>Replace All Data</h3>
+                    <form action="{{ url_for('staff_bp.upload_file') }}" method="post" enctype="multipart/form-data">
+                        <input type="file" id="fileUpload" name="fileUpload" required>
+                        <button type="submit" class="upload-btn">Upload and Replace</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="addStaffModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Staff Details</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form class="staff-form" id="staffForm" method="POST" action="{{ url_for('staff_bp.add_staff') }}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="accommodation_name">Accommodation Name</label>
+                            <select id="accommodation_name" name="accommodation_name" required>
+                                <option value="" disabled selected>Select Accommodation</option>
+                                {% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="room_number">Room Number (Vacant)</label>
+                            <select id="room_number" name="room_number" required>
+                                <option value="" disabled selected>Select Room</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="sap_id">SAP ID</label><input type="text" id="sap_id" name="sap_id" required></div>
+                        <div class="form-group"><label for="emp_name">Emp Name</label><input type="text" id="emp_name" name="emp_name" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="designation">Designation</label><input type="text" id="designation" name="designation"></div>
+                        <div class="form-group"><label for="department">Department</label><input type="text" id="department" name="department"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nationality">Nationality</label>
+                            <select id="nationality" name="nationality">
+                                <option value="" disabled selected>Select Country</option>
+                                {% for country in countries %}<option value="{{ country.name }}">{{ country.name }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <select id="state" name="state">
+                                <option value="" disabled selected>Select State</option>
+                            </select>
+                        </div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group">
+                            <label for="mobile_uae">Mobile Number UAE</label>
+                            <input type="text" id="mobile_uae" name="mobile_uae" pattern="05[0-9]{1}-[0-9]{7}" placeholder="05x-xxxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label for="home_contact">Home Contact</label>
+                            <div class="phone-input">
+                                <span id="phone_code_prefix"></span>
+                                <input type="text" id="home_contact" name="home_contact" placeholder="Number">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Save Record</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="downloadDataModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Download Filtered Data</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('acc_bp.download_data') }}">
+                    <div class="form-group full-width">
+                        <label for="filter_accommodation">Accommodation Name</label>
+                        <select id="filter_accommodation" name="filter_accommodation">
+                            <option value="">All Accommodations</option>
+                            {% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="filter_status">Status</label>
+                            <select id="filter_status" name="filter_status">
+                                <option value="">All Statuses</option>
+                                <option value="Active">Active</option>
+                                <option value="Vacation">Vacation</option>
+                                <option value="Resigned">Resigned</option>
+                                <option value="Vacant">Vacant</option>
+                                <option value="Checked-Out">Checked-Out</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filter_department">Department</label>
+                            <select id="filter_department" name="filter_department">
+                                <option value="">All Departments</option>
+                                {% for dept in departments %}<option value="{{ dept }}">{{ dept }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Download Excel File</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="addAccommodationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Accommodation Data</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Upload an Excel file to add new accommodation data. Existing data will not be replaced. Duplicate SAP IDs will be skipped.</p>
+                <form class="staff-form" method="POST" action="{{ url_for('staff_bp.add_accommodation_data') }}" enctype="multipart/form-data">
+                    <div class="form-group full-width">
+                        <label for="addAccomFile">Select Excel File</label>
+                        <input type="file" id="addAccomFile" name="addAccomFile" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Upload and Add Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="manageAccommodationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Accommodation Data</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('staff_bp.manage_accommodation') }}">
+                    <div class="form-group full-width">
+                        <label for="source_accommodation">Source Accommodation</label>
+                        <select id="source_accommodation" name="source_accommodation" required>
+                            <option value="" disabled selected>Select accommodation to manage...</option>
+                            {% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Action</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="action" value="shift" required> Shift to another</label>
+                            <label><input type="radio" name="action" value="remove"> Remove permanently</label>
+                        </div>
+                    </div>
+                    <div id="target_accommodation_wrapper" class="form-group full-width hidden">
+                        <label for="target_accommodation">Target Accommodation</label>
+                        <select id="target_accommodation" name="target_accommodation">
+                            <option value="" disabled selected>Select target...</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Confirm Action</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addStaffModal = document.getElementById('addStaffModal');
+            const downloadDataModal = document.getElementById('downloadDataModal');
+            const addAccommodationModal = document.getElementById('addAccommodationModal');
+            const manageAccommodationModal = document.getElementById('manageAccommodationModal');
+
+            const addStaffBtn = document.getElementById('addStaffBtn');
+            const downloadBtn = document.getElementById('downloadDataBtn');
+            const addAccomBtn = document.getElementById('addAccomBtn');
+            const manageAccomBtn = document.getElementById('manageAccomBtn');
+            
+            const closeBtns = document.querySelectorAll('.modal .close-btn');
+
+            if (addStaffBtn) addStaffBtn.onclick = () => { addStaffModal.style.display = 'flex'; };
+            if (downloadBtn) downloadBtn.onclick = () => { downloadDataModal.style.display = 'flex'; };
+            if (addAccomBtn) addAccomBtn.onclick = () => { addAccommodationModal.style.display = 'flex'; };
+            if (manageAccomBtn) manageAccomBtn.onclick = () => { manageAccommodationModal.style.display = 'flex'; };
+
+            closeBtns.forEach(btn => {
+                btn.onclick = (e) => { e.target.closest('.modal').style.display = 'none'; };
+            });
+
+            window.onclick = (event) => {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
+            
+            const accommodationSelect = document.getElementById('accommodation_name');
+            const roomSelect = document.getElementById('room_number');
+            const nationalitySelect = document.getElementById('nationality');
+            const stateSelect = document.getElementById('state');
+            const phoneCodePrefix = document.getElementById('phone_code_prefix');
+
+            if (accommodationSelect) {
+                accommodationSelect.addEventListener('change', async function() {
+                    const accName = this.value;
+                    roomSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+                    if (!accName) {
+                        roomSelect.innerHTML = '<option value="" disabled selected>Select Room</option>';
+                        return;
+                    }
+                    const response = await fetch(`/get_vacant_rooms/${accName}`);
+                    const rooms = await response.json();
+                    
+                    roomSelect.innerHTML = '<option value="" disabled selected>Select Room</option>';
+                    rooms.forEach(room => {
+                        const option = document.createElement('option');
+                        option.value = room;
+                        option.textContent = room;
+                        roomSelect.appendChild(option);
+                    });
+                });
+            }
+
+            if (nationalitySelect) {
+                nationalitySelect.addEventListener('change', async function() {
+                    const countryName = this.value;
+                    stateSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+                    phoneCodePrefix.textContent = '';
+                    if (!countryName) return;
+
+                    const response = await fetch(`/get_country_details/${countryName}`);
+                    const data = await response.json();
+
+                    stateSelect.innerHTML = '<option value="" disabled selected>Select State</option>';
+                    data.states.forEach(state => {
+                        const option = document.createElement('option');
+                        option.value = state;
+                        option.textContent = state;
+                        stateSelect.appendChild(option);
+                    });
+
+                    if (data.phone_code) {
+                        phoneCodePrefix.textContent = `+${data.phone_code}`;
+                    }
+                });
+            }
+
+            const sourceSelect = document.getElementById('source_accommodation');
+            const targetSelect = document.getElementById('target_accommodation');
+            const targetWrapper = document.getElementById('target_accommodation_wrapper');
+            const actionRadios = document.querySelectorAll('input[name="action"]');
+            
+            const allAccommodations = [{% for acc in accommodations %}"{{ acc }}",{% endfor %}];
+
+            actionRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'shift') {
+                        targetWrapper.classList.remove('hidden');
+                        targetSelect.required = true;
+                    } else {
+                        targetWrapper.classList.add('hidden');
+                        targetSelect.required = false;
+                    }
+                });
+            });
+
+            if(sourceSelect){
+                sourceSelect.addEventListener('change', function() {
+                    const selectedSource = this.value;
+                    targetSelect.innerHTML = '<option value="" disabled selected>Select target...</option>';
+                    allAccommodations.forEach(acc => {
+                        if (acc !== selectedSource) {
+                            const option = document.createElement('option');
+                            option.value = acc;
+                            option.textContent = acc;
+                            targetSelect.appendChild(option);
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

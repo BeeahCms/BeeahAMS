@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            
+            <div class="logo-placeholder">
+                <img src="{{ url_for('static', filename='images/beeah_logo.png') }}" alt="Beeah Logo" style="width: 80px; height: 80px; border-radius: 50%;">
+            </div>
+            
+            <h1 class="title">Welcome to Beeah Accommodation Management system</h1>
+            <p class="subtitle">Managed by WEKAYA</p>
+
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="flash-message">
+                  {{ messages[0] }}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('auth_bp.login_action') }}" method="post">
+                <div class="input-group">
+                    <label for="username">Username or Email</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <div class="options">
+                    <label class="save-credential">
+                        <input type="checkbox" name="save_credential"> Save Credential
+                    </label>
+                    <a href="#" onclick="showForgotPasswordMessage()">Forgot Password?</a>
+                </div>
+                
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showForgotPasswordMessage() {
+            alert("Please contact your IT administrator for Password reset.");
+        }
+    </script>
+</body>
+</html>

@@ -252,7 +252,6 @@ def checkout_staff(sap_id):
             
     flash('Could not find employee to check out.')
     return redirect(url_for('auth_bp.dashboard'))
-
 @staff_bp.route('/shift_staff/<sap_id>', methods=['POST'])
 def shift_staff(sap_id):
     global all_employees
@@ -296,7 +295,6 @@ def shift_staff(sap_id):
 
     flash('Shift failed. Could not find target vacant room.')
     return redirect(url_for('staff_bp.staff_details', sap_id=sap_id))
-
 @staff_bp.route('/add_staff', methods=['POST'])
 def add_staff():
     global all_employees

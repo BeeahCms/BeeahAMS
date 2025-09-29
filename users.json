@@ -1,0 +1,16 @@
+[
+    {
+        "username": "admin",
+        "email": "admin@beeah.ae",
+        "password": "password123",
+        "role": "Admin",
+        "allowed_accommodations": []
+    },
+    {
+        "username": "grabani",
+        "email": "grabani@beeahgroup.com",
+        "password": "123456",
+        "role": "Manager",
+        "allowed_accommodations": []
+    }
+]

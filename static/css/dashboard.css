@@ -1,15 +1,15 @@
 :root {
     --sidebar-bg: #0a2540;
     --header-bg: #ffffff;
-    --main-bg: #f4f7f6;
+    --main-bg: #f0f4f7;
     --card-bg: #ffffff;
-    --text-color: #333;
+    --text-color: #334155;
     --header-text: #0a2540;
     --primary-accent: #007bff;
     --danger-accent: #dc3545;
-    --light-text: #b0c4de;
-    --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    --card-border: 5px solid var(--primary-accent);
+    --light-text: #e2e8f0;
+    --card-shadow: 0 4px 20px rgba(0, 70, 130, 0.08);
+    --card-border: 4px solid var(--primary-accent);
 }
 
 body {
@@ -49,7 +49,7 @@ body {
 
 .header-subtitle {
     margin: 0;
-    color: #777;
+    color: #64748b;
     font-size: 14px;
     font-style: italic;
     font-weight: bold;
@@ -113,12 +113,13 @@ h2 {
     font-weight: 600;
     margin-top: 0;
     margin-bottom: 20px;
+    color: #1e293b;
 }
 
 .stats-cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
     margin-bottom: 30px;
 }
 
@@ -132,44 +133,65 @@ h2 {
     box-shadow: var(--card-shadow);
     padding: 25px;
     border-radius: 12px;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 25px rgba(0, 70, 130, 0.12);
 }
 
 .card p {
     margin: 0 0 10px 0;
-    color: #555;
+    color: #64748b;
     font-weight: 500;
+    font-size: 14px;
 }
 
 .card span {
     font-size: 36px;
     font-weight: 700;
     color: var(--header-text);
-    transition: color 0.3s;
 }
 
 .data-section {
-    display: flex;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 25px;
 }
 
 .main-data {
+    background-color: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+}
+
+.search-bar {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
     flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-bar button {
+    padding: 10px 20px;
+    border: none;
+    background-color: var(--primary-accent);
+    color: white;
+    border-radius: 6px;
+    margin-left: 10px;
+    cursor: pointer;
 }
 
 .table-container {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    overflow: hidden;
-    max-height: 500px;
-    overflow-y: auto;
-    transition: background-color 0.3s;
+    overflow-x: auto;
 }
 
 table {
@@ -178,52 +200,59 @@ table {
 }
 
 th, td {
-    padding: 15px;
+    padding: 12px 15px;
     text-align: left;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 thead th {
-    background-color: #f8f9fa;
+    background-color: #f8fafc;
     font-weight: 600;
-    position: sticky;
-    top: 0;
+    color: #475569;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+tbody tr:hover {
+    background-color: #f8fafc;
 }
 
 .summary {
-    width: 300px;
-    flex-shrink: 0;
+    background-color: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
 }
 
 .summary h3 {
     margin-top: 0;
-    padding: 0 10px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-weight: 600;
+    color: #1e293b;
 }
 
 .summary ul {
-    background-color: var(--card-bg);
     list-style: none;
-    padding: 15px;
+    padding: 0;
     margin: 0;
-    border-radius: 12px;
-    box-shadow: var(--card-shadow);
-    transition: background-color 0.3s;
 }
 
 .summary ul li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 12px 0;
     font-weight: 500;
+    border-bottom: 1px solid #f1f5f9;
+}
+.summary ul li:last-child {
+    border-bottom: none;
 }
 
 .summary ul li a {
     color: var(--primary-accent);
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
     transition: color 0.2s ease-in-out;
 }
 
@@ -237,16 +266,10 @@ thead th {
     padding: 4px 10px;
     border-radius: 12px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .summary .count.all {
-    background-color: #e3f2fd;
-    color: #1e88e5;
-}
-
-.store-dashboard-table {
-    display: block;
-    max-height: 600px;
-    overflow-y: auto;
+    background-color: #e0f2fe;
+    color: #0369a1;
 }

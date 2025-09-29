@@ -2,12 +2,12 @@
     {
         "Accommodation": "Sultan Accommodation",
         "Room": "Ag01",
-        "SAP ID": 14605.0,
-        "Emp Name": "Zakir",
-        "Designation": "IT Admin",
-        "Status": "Active",
-        "Department": "Tandeef",
-        "Nationality": "Pakistan"
+        "SAP ID": "",
+        "Emp Name": "",
+        "Designation": "",
+        "Department": "",
+        "Status": "Vacant",
+        "Nationality": ""
     },
     {
         "Accommodation": "Basma Accommodation",
@@ -16,7 +16,7 @@
         "Emp Name": "Rabani",
         "Designation": "Camp Amdin",
         "Status": "Vacation",
-        "Department": "Tadweer",
+        "Department": "Salamatq",
         "Nationality": "Pakistan"
     },
     {
@@ -25,7 +25,7 @@
         "SAP ID": 14607.0,
         "Emp Name": "Sagar",
         "Designation": "Camp Boss",
-        "Status": "Active",
+        "Status": "Vacation",
         "Department": "Salamatq",
         "Nationality": "India"
     },
@@ -58,5 +58,15 @@
         "Status": "Vacant",
         "Department": "",
         "Nationality": ""
+    },
+    {
+        "Accommodation": "N/A",
+        "Room": "N/A",
+        "SAP ID": 14605.0,
+        "Emp Name": "Zakir",
+        "Designation": "IT Admin",
+        "Status": "Checked-Out",
+        "Department": "Tandeef",
+        "Nationality": "Pakistan"
     }
 ]

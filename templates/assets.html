@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assets Report - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-left"><img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo"></div>
+        <div class="header-center"><h1>Assets Report</h1></div>
+        <div class="header-right">
+             <a href="{{ url_for('auth_bp.dashboard') }}" class="back-btn">Back to Dashboard</a>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+        </div>
+    </div>
+
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="{{ url_for('assets_bp.assets_report') }}">Asset reports</a></li>
+                <li><a href="{{ url_for('store_bp.store_report') }}">Store Record</a></li>
+                <li><a href="{{ url_for('contracts_bp.contracts_report') }}">Contracts</a></li>
+                <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-message">{{ messages[0][1] }}</div>{% endif %}{% endwith %}
+            
+            <div class="action-bar" style="justify-content: flex-start;">
+                <button class="action-btn" id="addAssetBtn">Add Asset</button>
+                <button class="action-btn" id="shiftAssetBtn">Shift Asset</button>
+                <button class="action-btn" id="scrapAssetBtn">Scrap Asset</button>
+                <button class="action-btn danger-btn" id="removeScrapBtn">Remove Scrap</button>
+            </div>
+
+            <section class="stats-cards">
+                <a href="{{ url_for('assets_bp.assets_report', status='Available') }}" class="card-link"><div class="card"><p>Total Available Assets</p><span>{{ stats.Available }}</span></div></a>
+                <a href="{{ url_for('assets_bp.assets_report', status='Scrap') }}" class="card-link"><div class="card"><p>Total Scrap Assets</p><span>{{ stats.Scrap }}</span></div></a>
+                 <a href="{{ url_for('assets_bp.assets_report') }}" class="card-link"><div class="card"><p>Grand Total</p><span>{{ stats.Available + stats.Scrap }}</span></div></a>
+            </section>
+
+            <div class="table-container full-width">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Accommodation</th>
+                            <th>Asset Name</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asset in assets %}
+                        <tr>
+                            <td>{{ asset.accommodation }}</td>
+                            <td>{{ asset.asset_name }}</td>
+                            <td>{{ asset.quantity }}</td>
+                            <td>{{ asset.status }}</td>
+                            <td>
+                                {% if asset.status == 'Scrap' and asset.get('sap_id') %}
+                                Scrapped by: {{ asset.get('emp_name', '') }} ({{ asset.get('sap_id')|int_sap }}) on {{ asset.get('scrap_date', '') }}
+                                {% else %}
+                                {{ asset.received_from }}
+                                {% endif %}
+                            </td>
+                            <td>{{ asset.remarks }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6" style="text-align:center;">No assets found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="addAssetModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Add New Asset</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('assets_bp.add_asset') }}">
+                    <div class="form-group full-width"><label>Accommodation Name</label><select name="accommodation" required><option value="" disabled selected>Select...</option>{% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}</select></div>
+                    <div class="form-row"><div class="form-group"><label>Asset Name</label><input type="text" name="asset_name" required></div><div class="form-group"><label>Quantity</label><input type="number" name="quantity" min="1" required></div></div>
+                    <div class="form-group full-width"><label>Received From</label><input type="text" name="received_from"></div>
+                    <div class="form-group full-width"><label>Remarks</label><textarea name="remarks" rows="3"></textarea></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Add Asset</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="shiftAssetModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Shift Asset</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('assets_bp.shift_asset') }}">
+                    <div class="form-row">
+                        <div class="form-group"><label>Source Accommodation</label><select name="source_accommodation" id="source_accommodation_shift" required><option value="" disabled selected>Select...</option>{% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}</select></div>
+                        <div class="form-group"><label>Asset Name</label><select name="asset_name_shift" id="asset_name_shift" required><option value="" disabled selected>Select Accommodation First</option></select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Quantity to Shift</label><input type="number" name="quantity_shift" min="1" required></div>
+                        <div class="form-group"><label>Target Accommodation</label><select name="target_accommodation" id="target_accommodation_shift" required><option value="" disabled selected>Select...</option>{% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}</select></div>
+                    </div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Confirm Shift</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="scrapAssetModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Scrap Asset</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('assets_bp.scrap_asset') }}">
+                    <div class="form-group full-width"><label>Accommodation</label><select name="scrap_accommodation" id="scrap_accommodation" required><option value="" disabled selected>Select...</option>{% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}</select></div>
+                    <div class="form-row">
+                         <div class="form-group"><label>Asset Name</label><select name="asset_name_scrap" id="asset_name_scrap" required><option value="" disabled selected>Select Accommodation First</option></select></div>
+                        <div class="form-group"><label>Quantity to Scrap</label><input type="number" name="quantity_scrap" min="1" required></div>
+                    </div>
+                    <div class="form-group full-width"><label>Scrap Date</label><input type="date" name="scrap_date" required></div>
+                    <hr style="margin: 15px 0;">
+                    <div class="form-row">
+                        <div class="form-group"><label>SAP ID (Scrapped By)</label><input type="text" id="scrap_sap_id" name="sap_id" required></div>
+                        <div class="form-group"><label>Name</label><input type="text" id="scrap_emp_name" name="emp_name" readonly></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Designation</label><input type="text" id="scrap_designation" name="designation" readonly></div>
+                        <div class="form-group"><label>Department</label><input type="text" id="scrap_department" name="department" readonly></div>
+                    </div>
+                    <div class="form-group full-width"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>
+                    <div class="form-actions"><button type="submit" class="danger-btn">Confirm Scrap</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="removeScrapModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Remove Scrap Asset</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <p>Select an asset from scrap to permanently remove a certain quantity from the records.</p>
+                <form class="staff-form" method="POST" action="{{ url_for('assets_bp.remove_scrap') }}">
+                    <div class="form-group full-width"><label>Accommodation</label><select name="remove_accommodation" id="remove_accommodation" required><option value="" disabled selected>Select...</option>{% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}</select></div>
+                    <div class="form-row">
+                         <div class="form-group"><label>Asset Name (from Scrap)</label><select name="asset_name_remove" id="asset_name_remove" required><option value="" disabled selected>Select Accommodation First</option></select></div>
+                        <div class="form-group"><label>Quantity to Remove</label><input type="number" name="quantity_remove" min="1" required></div>
+                    </div>
+                    <div class="form-group full-width"><label>Removal Date</label><input type="date" name="removal_date" required></div>
+                     <hr style="margin: 15px 0;">
+                    <div class="form-row">
+                        <div class="form-group"><label>SAP ID (Taken By)</label><input type="text" id="remove_sap_id" name="sap_id" required></div>
+                        <div class="form-group"><label>Name</label><input type="text" id="remove_emp_name" name="emp_name" readonly></div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group"><label>Designation</label><input type="text" id="remove_designation" name="designation" readonly></div>
+                        <div class="form-group"><label>Department</label><input type="text" id="remove_department" name="department" readonly></div>
+                    </div>
+                    <div class="form-group full-width"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>
+                    <div class="form-actions"><button type="submit" class="danger-btn">Confirm Removal</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modals = {
+                addAssetModal: document.getElementById('addAssetModal'),
+                shiftAssetModal: document.getElementById('shiftAssetModal'),
+                scrapAssetModal: document.getElementById('scrapAssetModal'),
+                removeScrapModal: document.getElementById('removeScrapModal')
+            };
+            const btns = {
+                addAssetBtn: document.getElementById('addAssetBtn'),
+                shiftAssetBtn: document.getElementById('shiftAssetBtn'),
+                scrapAssetBtn: document.getElementById('scrapAssetBtn'),
+                removeScrapBtn: document.getElementById('removeScrapBtn')
+            };
+
+            if(btns.addAssetBtn) btns.addAssetBtn.onclick = () => { modals.addAssetModal.style.display = 'flex'; };
+            if(btns.shiftAssetBtn) btns.shiftAssetBtn.onclick = () => { modals.shiftAssetModal.style.display = 'flex'; };
+            if(btns.scrapAssetBtn) btns.scrapAssetBtn.onclick = () => { modals.scrapAssetModal.style.display = 'flex'; };
+            if(btns.removeScrapBtn) btns.removeScrapBtn.onclick = () => { modals.removeScrapModal.style.display = 'flex'; };
+
+            document.querySelectorAll('.modal .close-btn').forEach(btn => {
+                btn.onclick = (e) => { e.target.closest('.modal').style.display = 'none'; };
+            });
+
+            window.onclick = (event) => {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
+
+            async function populateAssets(accSelect, assetSelect, status) {
+                const accName = accSelect.value;
+                assetSelect.innerHTML = '<option value="" disabled selected>Loading...</option>';
+                if (!accName) {
+                    assetSelect.innerHTML = `<option value="" disabled selected>Select Accommodation First</option>`;
+                    return;
+                }
+                const response = await fetch(`/get_assets/${accName}/${status}`);
+                const assets = await response.json();
+                
+                assetSelect.innerHTML = `<option value="" disabled selected>Select Asset</option>`;
+                assets.forEach(asset => {
+                    const option = document.createElement('option');
+                    option.value = asset;
+                    option.textContent = asset;
+                    assetSelect.appendChild(option);
+                });
+            }
+
+            async function fetchEmployeeDetails(sapId, nameInput, desigInput, deptInput) {
+                nameInput.value = '';
+                desigInput.value = '';
+                deptInput.value = '';
+                if (!sapId) return;
+
+                const response = await fetch(`/get_employee_details/${sapId}`);
+                if (!response.ok) {
+                    nameInput.value = 'Error fetching details';
+                    return;
+                }
+                const data = await response.json();
+
+                if(data && data['Emp Name']) {
+                    nameInput.value = data['Emp Name'];
+                    desigInput.value = data['Designation'];
+                    deptInput.value = data['Department'];
+                } else {
+                    nameInput.value = 'SAP ID not found';
+                }
+            }
+            
+            const sourceAccShift = document.getElementById('source_accommodation_shift');
+            const assetNameShift = document.getElementById('asset_name_shift');
+            const scrapAcc = document.getElementById('scrap_accommodation');
+            const assetNameScrap = document.getElementById('asset_name_scrap');
+            const removeAcc = document.getElementById('remove_accommodation');
+            const assetNameRemove = document.getElementById('asset_name_remove');
+
+            if(sourceAccShift) sourceAccShift.addEventListener('change', () => populateAssets(sourceAccShift, assetNameShift, 'Available'));
+            if(scrapAcc) scrapAcc.addEventListener('change', () => populateAssets(scrapAcc, assetNameScrap, 'Available'));
+            if(removeAcc) removeAcc.addEventListener('change', () => populateAssets(removeAcc, assetNameRemove, 'Scrap'));
+            
+            const scrapSapIdInput = document.getElementById('scrap_sap_id');
+            if(scrapSapIdInput) {
+                scrapSapIdInput.addEventListener('blur', () => fetchEmployeeDetails(
+                    scrapSapIdInput.value, 
+                    document.getElementById('scrap_emp_name'),
+                    document.getElementById('scrap_designation'),
+                    document.getElementById('scrap_department')
+                ));
+            }
+
+            const removeSapIdInput = document.getElementById('remove_sap_id');
+            if(removeSapIdInput) {
+                removeSapIdInput.addEventListener('blur', () => fetchEmployeeDetails(
+                    removeSapIdInput.value,
+                    document.getElementById('remove_emp_name'),
+                    document.getElementById('remove_designation'),
+                    document.getElementById('remove_department')
+                ));
+            }
+        });
+    </script>
+</body>
+</html>

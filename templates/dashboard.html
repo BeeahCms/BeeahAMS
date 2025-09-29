@@ -19,7 +19,6 @@
         </div>
         <div class="header-right">
             <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
-            <button class="lang-toggle">Language Toggle</button>
             <a href="{{ url_for('auth_bp.logout') }}" class="logout-link">Logout</a>
         </div>
     </header>
@@ -31,9 +30,9 @@
                 <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
                 <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
                 <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
-                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Asset reports</a></li>
-                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Store Record</a></li>
-                <li><a href="#" onclick="alert('This feature is coming soon!'); return false;">Contracts</a></li>
+                <li><a href="{{ url_for('assets_bp.assets_report') }}">Asset reports</a></li>
+                <li><a href="{{ url_for('store_bp.store_report') }}">Store Record</a></li>
+                <li><a href="{{ url_for('contracts_bp.contracts_report') }}">Contracts</a></li>
                 <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
             </ul>
         </nav>

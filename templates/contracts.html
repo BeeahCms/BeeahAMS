@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contracts - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-left"><img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo"></div>
+        <div class="header-center"><h1>Contracts Management</h1></div>
+        <div class="header-right">
+             <a href="{{ url_for('auth_bp.dashboard') }}" class="back-btn">Back to Dashboard</a>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+        </div>
+    </div>
+
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="{{ url_for('assets_bp.assets_report') }}">Asset reports</a></li>
+                <li><a href="{{ url_for('store_bp.store_report') }}">Store Record</a></li>
+                <li class="active"><a href="{{ url_for('contracts_bp.contracts_report') }}">Contracts</a></li>
+                <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-message">{{ messages[0][1] }}</div>{% endif %}{% endwith %}
+            
+            {% if session.get('role') in ['Admin', 'Manager'] %}
+            <div class="action-bar" style="justify-content: flex-start;">
+                <button class="action-btn" id="addContractBtn">Add New Contract</button>
+                <button class="action-btn" id="addTypeBtn">Add Contract Type</button>
+            </div>
+            {% endif %}
+
+            <div class="table-container full-width" style="margin-top:20px;">
+                <table>
+                    <thead><tr><th>Accommodation</th><th>Contract Type</th><th>Caption</th><th>Attachment</th><th>Action</th></tr></thead>
+                    <tbody>
+                        {% for contract in contracts %}
+                        <tr>
+                            <td>{{ contract.accommodation }}</td>
+                            <td>{{ contract.contract_type }}</td>
+                            <td>{{ contract.caption }}</td>
+                            <td>
+                                {% if contract.attachment %}
+                                <a href="{{ url_for('contracts_bp.uploaded_contract_file', filename=contract.attachment) }}" class="table-link" target="_blank">View/Download</a>
+                                {% else %}
+                                No File
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if session.get('role') in ['Admin', 'Manager'] %}
+                                <form method="POST" action="{{ url_for('contracts_bp.delete_contract', contract_id=contract.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+                                    <button type="submit" class="danger-btn-sm">Delete</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5" style="text-align:center;">No contracts found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="addContractModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Add New Contract</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('contracts_bp.add_contract') }}" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Accommodation</label>
+                            <select name="accommodation" required>
+                                <option value="" disabled selected>Select...</option>
+                                {% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                             <label>Contract Type</label>
+                            <select name="contract_type" required>
+                                <option value="" disabled selected>Select...</option>
+                                {% for type in contract_types %}<option value="{{ type }}">{{ type }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group full-width"><label>Caption</label><input type="text" name="caption" required></div>
+                    <div class="form-group full-width"><label>Upload Contract File</label><input type="file" name="attachment" required></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Save Contract</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="addTypeModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Add New Contract Type</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('contracts_bp.add_contract_type') }}">
+                    <div class="form-group full-width"><label>New Type Name</label><input type="text" name="type_name" required></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Save Type</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addContractModal = document.getElementById('addContractModal');
+            const addTypeModal = document.getElementById('addTypeModal');
+            const addContractBtn = document.getElementById('addContractBtn');
+            const addTypeBtn = document.getElementById('addTypeBtn');
+            const closeBtns = document.querySelectorAll('.modal .close-btn');
+
+            if(addContractBtn) { addContractBtn.onclick = () => { addContractModal.style.display = 'flex'; }; }
+            if(addTypeBtn) { addTypeBtn.onclick = () => { addTypeModal.style.display = 'flex'; }; }
+
+            closeBtns.forEach(btn => {
+                btn.onclick = (e) => { e.target.closest('.modal').style.display = 'none'; };
+            });
+
+            window.onclick = (event) => {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
+        });
+    </script>
+</body>
+</html>

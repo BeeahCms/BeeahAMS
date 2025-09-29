@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issued Items Details - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-left"><img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo"></div>
+        <div class="header-center"><h1>Issued Items Details</h1></div>
+        <div class="header-right">
+             <a href="{{ url_for('store_bp.store_report') }}" class="back-btn">Back to Store</a>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+        </div>
+    </div>
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="{{ url_for('assets_bp.assets_report') }}">Asset reports</a></li>
+                <li class="active"><a href="{{ url_for('store_bp.store_report') }}">Store Record</a></li>
+                <li><a href="{{ url_for('contracts_bp.contracts_report') }}">Contracts</a></li>
+                <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <h2>{{ item_name }} - Issued at {{ accommodation }}</h2>
+            <form method="POST" action="{{ url_for('store_bp.download_issued_details', accommodation=accommodation, item_name=item_name) }}">
+                <button type="submit" class="action-btn large-btn">Download This List</button>
+            </form>
+            <div class="table-container full-width" style="margin-top:20px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SAP ID</th>
+                            <th>Employee Name</th>
+                            <th>Designation</th>
+                            <th>Department</th>
+                            <th>Quantity Issued</th>
+                            <th>Issue Date</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in issued_records %}
+                        <tr>
+                            <td>{{ item.sap_id|int_sap }}</td>
+                            <td>{{ item.emp_name }}</td>
+                            <td>{{ item.designation }}</td>
+                            <td>{{ item.department }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.issue_date }}</td>
+                            <td>{{ item.remarks }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7" style="text-align:center;">No records found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

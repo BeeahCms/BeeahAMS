@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Records - Beeah CMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accommodation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-left"><img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Logo 1" class="header-logo"></div>
+        <div class="header-center"><h1>Store Records</h1></div>
+        <div class="header-right">
+             <a href="{{ url_for('auth_bp.dashboard') }}" class="back-btn">Back to Dashboard</a>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
+        </div>
+    </div>
+
+    <div class="page-container">
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('auth_bp.dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('acc_bp.accommodation_data') }}">Accommodation Data</a></li>
+                <li><a href="{{ url_for('maintenance_bp.maintenance_report') }}">Maintenance Report</a></li>
+                <li><a href="{{ url_for('amcs_bp.amcs_report') }}">Amcs Services</a></li>
+                <li><a href="{{ url_for('assets_bp.assets_report') }}">Asset reports</a></li>
+                <li class="active"><a href="{{ url_for('store_bp.store_report') }}">Store Record</a></li>
+                <li><a href="{{ url_for('contracts_bp.contracts_report') }}">Contracts</a></li>
+                <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-message">{{ messages[0][1] }}</div>{% endif %}{% endwith %}
+            
+            <div class="action-bar" style="justify-content: flex-start;">
+                {% if session.get('role') in ['Admin', 'Manager'] %}
+                <button class="action-btn" id="addItemBtn">Add Master Item</button>
+                {% endif %}
+                <button class="action-btn" id="receiveStockBtn">Receive Stock</button>
+                {% if session.get('role') in ['Admin', 'Manager'] or 'Sultan Accommodation' in session.get('allowed_accommodations', []) %}
+                <button class="action-btn" id="distributeStockBtn">Distribute from Central</button>
+                {% endif %}
+                <button class="action-btn" id="issueToEmpBtn">Issue to Employee</button>
+                <button class="action-btn" id="downloadReportBtn">Download Report</button>
+            </div>
+
+            <div class="main-data" style="margin-top: 20px;">
+                <form method="GET" action="{{ url_for('store_bp.store_report') }}">
+                    <div class="search-bar">
+                        <input type="text" id="itemSearchInput" name="search" placeholder="Type to search items..." value="{{ request.args.get('search', '') }}">
+                        <button type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-container full-width store-dashboard-table" style="margin-top: 20px;">
+                <h3>Inventory Dashboard</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            {% for loc in visible_locations %}
+                                <th style="text-align: center;">{{ loc }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item_name, locations in summary.items() %}
+                        <tr>
+                            <td><strong>{{ item_name }}</strong></td>
+                            {% for loc in visible_locations %}
+                                <td style="text-align: center;">
+                                    <div>Stock: {{ locations[loc]['stock'] }}</div>
+                                    <div style="color: #c62828;">Issued: 
+                                        {% if locations[loc]['issued'] > 0 %}
+                                            <a href="{{ url_for('store_bp.issued_details', accommodation=loc, item_name=item_name) }}" class="table-link">{{ locations[loc]['issued'] }}</a>
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </div>
+                                    <hr style="margin: 2px 0;">
+                                    <strong>Balance: {{ locations[loc]['stock'] - locations[loc]['issued'] }}</strong>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="{{ visible_locations|length + 1 }}" style="text-align:center;">No inventory records found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="addItemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Add New Master Item</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('store_bp.add_store_item') }}">
+                    <div class="form-group full-width"><label>New Item Name</label><input type="text" name="item_name" required></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Save Item</button></div>
+                </form>
+                <hr style="margin: 20px 0;">
+                <h4>Bulk Upload from Excel</h4>
+                <form class="staff-form" method="POST" action="{{ url_for('store_bp.upload_master_items') }}" enctype="multipart/form-data">
+                    <div class="form-group full-width">
+                        <label>Select Excel File (with 'ItemName' column)</label>
+                        <input type="file" name="master_items_file" required>
+                    </div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Upload and Add</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="receiveStockModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Receive Stock</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('store_bp.receive_stock') }}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Location</label>
+                            <select name="accommodation" required>
+                                <option value="" disabled selected>Select...</option>
+                                {% if session.get('role') in ['Admin', 'Manager'] or 'Sultan Accommodation' in session.get('allowed_accommodations', []) %}<option value="Central Store">Central Store</option>{% endif %}
+                                {% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Item Description</label>
+                            <select name="item_name" required>
+                                <option value="" disabled selected>Select...</option>
+                                {% for item in master_items %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group full-width"><label>Received Quantity</label><input type="number" name="quantity" min="1" required></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Receive Stock</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="distributeStockModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Distribute Stock from Central Store</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('store_bp.distribute_stock') }}">
+                     <div class="form-row">
+                        <div class="form-group">
+                            <label>Item to Distribute</label>
+                            <select name="item_name_dist" required>
+                                <option value="" disabled selected>Select...</option>
+                                {% for item in master_items %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Quantity</label><input type="number" name="quantity_dist" min="1" required></div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Target Accommodation</label>
+                        <select name="target_accommodation" required>
+                            <option value="" disabled selected>Select...</option>
+                            {% for acc in all_locations %}{% if acc != 'Central Store' %}<option value="{{ acc }}">{{ acc }}</option>{% endif %}{% endfor %}
+                        </select>
+                    </div>
+                    <hr style="margin: 15px 0;">
+                    <div class="form-row">
+                        <div class="form-group"><label>SAP ID (Received By)</label><input type="text" id="dist_sap_id" name="sap_id" required></div>
+                        <div class="form-group"><label>Name</label><input type="text" id="dist_emp_name" name="emp_name" readonly></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Designation</label><input type="text" id="dist_designation" name="designation" readonly></div>
+                        <div class="form-group"><label>Department</label><input type="text" id="dist_department" name="department" readonly></div>
+                    </div>
+                    <div class="form-group full-width"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Distribute</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="issueToEmployeeModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Issue Item to Employee</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('store_bp.issue_to_employee') }}">
+                    <div class="form-row">
+                        <div class="form-group"><label>Issue From (Accommodation)</label><select name="accommodation_issue" required><option value="" disabled selected>Select...</option>{% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}</select></div>
+                        <div class="form-group"><label>Item Description</label><select name="item_name_issue" required><option value="" disabled selected>Select...</option>{% for item in master_items %}<option value="{{ item }}">{{ item }}</option>{% endfor %}</select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Quantity to Issue</label><input type="number" name="quantity_issue" min="1" required></div>
+                        <div class="form-group"><label>Issue Date</label><input type="date" name="issue_date" required></div>
+                    </div>
+                    <hr style="margin: 15px 0;">
+                    <div class="form-row">
+                        <div class="form-group"><label>SAP ID (Issued To)</label><input type="text" id="issue_sap_id" name="sap_id" required></div>
+                        <div class="form-group"><label>Name</label><input type="text" id="issue_emp_name" name="emp_name" readonly></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Designation</label><input type="text" id="issue_designation" name="designation" readonly></div>
+                        <div class="form-group"><label>Department</label><input type="text" id="issue_department" name="department" readonly></div>
+                    </div>
+                    <div class="form-group full-width"><label>Remarks</label><textarea name="remarks" rows="2"></textarea></div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Issue Item</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="downloadReportModal" class="modal">
+        <div class="modal-content"><div class="modal-header"><h2>Download Store Report</h2><span class="close-btn">&times;</span></div>
+            <div class="modal-body">
+                <form class="staff-form" method="POST" action="{{ url_for('store_bp.download_store_report') }}">
+                    <div class="form-group full-width">
+                        <label>Accommodation</label>
+                        <select name="accommodation_report">
+                            <option value="">All (Your Allowed)</option>
+                            {% for acc in accommodations %}<option value="{{ acc }}">{{ acc }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Report Type</label>
+                        <select name="report_type" required>
+                            <option value="Stock">Stock Report</option>
+                            <option value="Issued">Issued Report</option>
+                            <option value="Balance">Balance Report</option>
+                        </select>
+                    </div>
+                    <div class="form-actions"><button type="submit" class="submit-btn">Download Report</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modals = {
+                addItemModal: document.getElementById('addItemModal'),
+                receiveStockModal: document.getElementById('receiveStockModal'),
+                distributeStockModal: document.getElementById('distributeStockModal'),
+                issueToEmployeeModal: document.getElementById('issueToEmployeeModal'),
+                downloadReportModal: document.getElementById('downloadReportModal')
+            };
+            const btns = {
+                addItemBtn: document.getElementById('addItemBtn'),
+                receiveStockBtn: document.getElementById('receiveStockBtn'),
+                distributeStockBtn: document.getElementById('distributeStockBtn'),
+                issueToEmpBtn: document.getElementById('issueToEmpBtn'),
+                downloadReportBtn: document.getElementById('downloadReportBtn')
+            };
+            
+            if(btns.addItemBtn) btns.addItemBtn.onclick = () => { modals.addItemModal.style.display = 'flex'; };
+            if(btns.receiveStockBtn) btns.receiveStockBtn.onclick = () => { modals.receiveStockModal.style.display = 'flex'; };
+            if(btns.distributeStockBtn) btns.distributeStockBtn.onclick = () => { modals.distributeStockModal.style.display = 'flex'; };
+            if(btns.issueToEmpBtn) btns.issueToEmpBtn.onclick = () => { modals.issueToEmployeeModal.style.display = 'flex'; };
+            if(btns.downloadReportBtn) btns.downloadReportBtn.onclick = () => { modals.downloadReportModal.style.display = 'flex'; };
+
+            document.querySelectorAll('.modal .close-btn').forEach(btn => {
+                btn.onclick = (e) => { e.target.closest('.modal').style.display = 'none'; };
+            });
+
+            window.onclick = (event) => {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            };
+            
+            async function fetchEmployeeDetails(sapId, nameInput, desigInput, deptInput) {
+                nameInput.value = ''; 
+                if(desigInput) desigInput.value = '';
+                if(deptInput) deptInput.value = '';
+
+                if (!sapId) return;
+                const response = await fetch(`/get_employee_details/${sapId}`);
+                if (!response.ok) { nameInput.value = 'Error fetching'; return; }
+                const data = await response.json();
+                if(data && data['Emp Name']) { 
+                    nameInput.value = data['Emp Name'];
+                    if(desigInput) desigInput.value = data['Designation'];
+                    if(deptInput) deptInput.value = data['Department'];
+                } else { nameInput.value = 'SAP ID not found'; }
+            }
+            
+            const issueSapIdInput = document.getElementById('issue_sap_id');
+            if(issueSapIdInput) {
+                issueSapIdInput.addEventListener('blur', () => fetchEmployeeDetails(
+                    issueSapIdInput.value, 
+                    document.getElementById('issue_emp_name'),
+                    document.getElementById('issue_designation'),
+                    document.getElementById('issue_department')
+                ));
+            }
+
+            const distSapIdInput = document.getElementById('dist_sap_id');
+            if(distSapIdInput) {
+                distSapIdInput.addEventListener('blur', () => fetchEmployeeDetails(
+                    distSapIdInput.value,
+                    document.getElementById('dist_emp_name'),
+                    document.getElementById('dist_designation'),
+                    document.getElementById('dist_department')
+                ));
+            }
+        });
+    </script>
+</body>
+</html>

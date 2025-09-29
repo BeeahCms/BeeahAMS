@@ -1,16 +1,16 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash, jsonify
+from utils.permissions import can_modify
 import pandas as pd
 from collections import Counter
 import json
 import os
+import time
 
 staff_bp = Blueprint('staff_bp', __name__)
 
-DATA_DIR = os.environ.get('RENDER_DATA_DIR', '.')
-DATA_FILE = os.path.join(DATA_DIR, 'data.json')
+DATA_FILE = 'data.json'
 
 def load_data_from_json():
-    os.makedirs(DATA_DIR, exist_ok=True)
     try:
         with open(DATA_FILE, 'r') as f:
             return json.load(f)
@@ -29,6 +29,26 @@ def load_countries_data():
         return json.load(f)
 
 countries_data = load_countries_data()
+
+@staff_bp.route('/get_employee_details/<sap_id>')
+def get_employee_details(sap_id):
+    if 'username' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    employee_details = {}
+    for emp in all_employees:
+        try:
+            if int(float(emp.get('SAP ID'))) == int(float(sap_id)):
+                employee_details = {
+                    "Emp Name": emp.get('Emp Name'),
+                    "Designation": emp.get('Designation'),
+                    "Department": emp.get('Department')
+                }
+                break
+        except (ValueError, TypeError):
+            continue
+    
+    return jsonify(employee_details)
 
 @staff_bp.route('/upload', methods=['POST'])
 def upload_file():
@@ -176,6 +196,7 @@ def staff_details(sap_id):
 @staff_bp.route('/update_staff/<sap_id>', methods=['POST'])
 def update_staff(sap_id):
     employee_to_update = next((emp for emp in all_employees if str(int(float(emp.get('SAP ID', 0)))) == str(sap_id)), None)
+    
     if not employee_to_update:
         flash('Could not find employee to update.')
         return redirect(url_for('auth_bp.dashboard'))
@@ -197,6 +218,7 @@ def update_staff(sap_id):
 
 @staff_bp.route('/checkout_staff/<sap_id>', methods=['POST'])
 def checkout_staff(sap_id):
+    global all_employees
     for i, emp in enumerate(all_employees):
         if str(int(float(emp.get('SAP ID', 0)))) == str(sap_id):
             if not can_modify(emp.get('Accommodation')):
@@ -219,6 +241,7 @@ def checkout_staff(sap_id):
 
 @staff_bp.route('/shift_staff/<sap_id>', methods=['POST'])
 def shift_staff(sap_id):
+    global all_employees
     original_record_index, employee_data = next(((i, emp.copy()) for i, emp in enumerate(all_employees) if str(int(float(emp.get('SAP ID', 0)))) == str(sap_id)), (None, None))
     
     if not employee_data:
@@ -250,6 +273,7 @@ def shift_staff(sap_id):
 
 @staff_bp.route('/add_staff', methods=['POST'])
 def add_staff():
+    global all_employees
     form_data = request.form
     acc_name = form_data.get('accommodation_name')
 

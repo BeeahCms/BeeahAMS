@@ -163,15 +163,18 @@ def manage_accommodation():
 
 @staff_bp.route('/staff/<sap_id>')
 def staff_details(sap_id):
-    if 'username' not in session: return redirect(url_for('auth_bp.login'))
+    if 'username' not in session:
+        return redirect(url_for('auth_bp.login'))
     
     employee_to_show = None
     for emp in all_employees:
-        try:
-            if int(float(emp.get('SAP ID'))) == int(float(sap_id)):
-                employee_to_show = emp
-                break
-        except (ValueError, TypeError): continue
+        if emp.get('SAP ID'):
+            try:
+                if int(float(emp.get('SAP ID'))) == int(float(sap_id)):
+                    employee_to_show = emp
+                    break
+            except (ValueError, TypeError):
+                continue
             
     if not employee_to_show:
         flash(f"No employee found with SAP ID: {sap_id}")
@@ -192,11 +195,18 @@ def staff_details(sap_id):
         departments=departments,
         countries=countries_data
     )
-
 @staff_bp.route('/update_staff/<sap_id>', methods=['POST'])
 def update_staff(sap_id):
-    employee_to_update = next((emp for emp in all_employees if str(int(float(emp.get('SAP ID', 0)))) == str(sap_id)), None)
-    
+    employee_to_update = None
+    for emp in all_employees:
+        if emp.get('SAP ID'):
+            try:
+                if int(float(emp.get('SAP ID'))) == int(float(sap_id)):
+                    employee_to_update = emp
+                    break
+            except (ValueError, TypeError):
+                continue
+
     if not employee_to_update:
         flash('Could not find employee to update.')
         return redirect(url_for('auth_bp.dashboard'))
@@ -220,21 +230,25 @@ def update_staff(sap_id):
 def checkout_staff(sap_id):
     global all_employees
     for i, emp in enumerate(all_employees):
-        if str(int(float(emp.get('SAP ID', 0)))) == str(sap_id):
-            if not can_modify(emp.get('Accommodation')):
-                return redirect(url_for('staff_bp.staff_details', sap_id=sap_id))
-            
-            ex_employee_record = emp.copy()
-            ex_employee_record.update({'Status': 'Checked-Out', 'Accommodation': 'N/A', 'Room': 'N/A'})
-            
-            all_employees[i] = {
-                'Accommodation': emp.get('Accommodation'), 'Room': emp.get('Room'), 'SAP ID': '', 
-                'Emp Name': '', 'Designation': '', 'Department': '', 'Status': 'Vacant', 'Nationality': ''
-            }
-            all_employees.append(ex_employee_record)
-            save_data_to_json(all_employees)
-            flash(f"Employee {sap_id} has been checked out.")
-            return redirect(url_for('auth_bp.dashboard'))
+        if emp.get('SAP ID'):
+            try:
+                if int(float(emp.get('SAP ID'))) == int(float(sap_id)):
+                    if not can_modify(emp.get('Accommodation')):
+                        return redirect(url_for('staff_bp.staff_details', sap_id=sap_id))
+                    
+                    ex_employee_record = emp.copy()
+                    ex_employee_record.update({'Status': 'Checked-Out', 'Accommodation': 'N/A', 'Room': 'N/A'})
+                    
+                    all_employees[i] = {
+                        'Accommodation': emp.get('Accommodation'), 'Room': emp.get('Room'), 'SAP ID': '', 
+                        'Emp Name': '', 'Designation': '', 'Department': '', 'Status': 'Vacant', 'Nationality': ''
+                    }
+                    all_employees.append(ex_employee_record)
+                    save_data_to_json(all_employees)
+                    flash(f"Employee {sap_id} has been checked out.")
+                    return redirect(url_for('auth_bp.dashboard'))
+            except (ValueError, TypeError):
+                continue
             
     flash('Could not find employee to check out.')
     return redirect(url_for('auth_bp.dashboard'))
@@ -242,8 +256,20 @@ def checkout_staff(sap_id):
 @staff_bp.route('/shift_staff/<sap_id>', methods=['POST'])
 def shift_staff(sap_id):
     global all_employees
-    original_record_index, employee_data = next(((i, emp.copy()) for i, emp in enumerate(all_employees) if str(int(float(emp.get('SAP ID', 0)))) == str(sap_id)), (None, None))
     
+    original_record_index = -1
+    employee_data = None
+
+    for i, emp in enumerate(all_employees):
+        if emp.get('SAP ID'):
+            try:
+                if int(float(emp.get('SAP ID'))) == int(float(sap_id)):
+                    original_record_index = i
+                    employee_data = emp.copy()
+                    break
+            except (ValueError, TypeError):
+                continue
+
     if not employee_data:
         flash('Shift failed. Could not find original employee.')
         return redirect(url_for('auth_bp.dashboard'))
@@ -256,7 +282,7 @@ def shift_staff(sap_id):
     
     target_record_index = next((i for i, emp in enumerate(all_employees) if emp.get('Accommodation') == new_acc and emp.get('Room') == new_room and emp.get('Status') == 'Vacant'), None)
             
-    if original_record_index is not None and target_record_index is not None:
+    if original_record_index != -1 and target_record_index is not None:
         all_employees[target_record_index].update(employee_data)
         all_employees[target_record_index].update({'Accommodation': new_acc, 'Room': new_room, 'Status': 'Active'})
         

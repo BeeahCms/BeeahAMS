@@ -1,9 +1,0 @@
-[
-    {
-        "username": "admin",
-        "email": "admin@beeah.ae",
-        "password": "password123",
-        "role": "Admin",
-        "allowed_accommodations": []
-    }
-]

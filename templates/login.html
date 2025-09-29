@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Beeah CMS</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
-            
-            <div class="logo-placeholder">
-                <img src="{{ url_for('static', filename='images/beeah_logo.png') }}" alt="Beeah Logo" style="width: 80px; height: 80px; border-radius: 50%;">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/beeah_logo.png') }}" alt="Beeah Logo">
             </div>
             
             <h1 class="title">Welcome to Beeah Accommodation Management system</h1>
-            <p class="subtitle">Managed by WEKAYA</p>
+            <p class="subtitle">Manage by WEKAYA</p>
 
             {% with messages = get_flashed_messages() %}
               {% if messages %}

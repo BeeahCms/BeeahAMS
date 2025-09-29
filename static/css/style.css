@@ -43,15 +43,15 @@ body {
 }
 
 .title {
-    font-size: 24px;
-    color: #0a2540;
+    font-size: 22px;
+    color: #1E90FF;
     font-weight: 600;
     margin-bottom: 5px;
 }
 
 .subtitle {
-    font-size: 14px;
-    color: #6c757d;
+    font-size: 13px;
+    color: #90EE90;
     margin-bottom: 30px;
     font-style: italic;
 }

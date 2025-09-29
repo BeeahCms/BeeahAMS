@@ -224,7 +224,7 @@ def update_staff(sap_id):
     })
     save_data_to_json(all_employees)
     flash('Employee details updated successfully!')
-    return redirect(url_for('staff_bp.staff_details', sap_id=sap_id))
+    return redirect(url_for('staff_bp.staff_details', sap_id=sap_id)))
 
 @staff_bp.route('/checkout_staff/<sap_id>', methods=['POST'])
 def checkout_staff(sap_id):

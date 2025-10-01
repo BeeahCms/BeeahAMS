@@ -12,5 +12,14 @@
         "password": "123456",
         "role": "Manager",
         "allowed_accommodations": []
+    },
+    {
+        "username": "sagark",
+        "email": "skathakonda@beeahgroup.com",
+        "password": "123456",
+        "role": "Camp boss",
+        "allowed_accommodations": [
+            "Sultan Accommodation"
+        ]
     }
 ]

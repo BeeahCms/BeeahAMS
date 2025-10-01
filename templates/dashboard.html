@@ -15,11 +15,10 @@
         </div>
         <div class="header-center">
             <h1>Beeah Accommodation System</h1>
-            <p class="header-subtitle">Manage by Wekaya</p>
+            <p class="header-subtitle">Managed by Wekaya</p>
         </div>
         <div class="header-right">
             <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
-            <a href="{{ url_for('auth_bp.logout') }}" class="logout-link">Logout</a>
         </div>
     </header>
 
@@ -34,6 +33,7 @@
                 <li><a href="{{ url_for('store_bp.store_report') }}">Store Record</a></li>
                 <li><a href="{{ url_for('contracts_bp.contracts_report') }}">Contracts</a></li>
                 <li><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+                <li style="margin-top: auto; padding-top: 20px;"><a href="{{ url_for('auth_bp.logout') }}" class="logout-link-sidebar">Logout</a></li>
             </ul>
         </nav>
         
@@ -47,37 +47,16 @@
             <h2>Dashboard</h2>
 
             <section class="stats-cards">
-                <a href="{{ url_for('auth_bp.dashboard') }}" class="card-link">
-                    <div class="card">
-                        <p>Total Employees</p>
-                        <span>{{ stats.total }}</span>
-                    </div>
-                </a>
-                <a href="{{ url_for('auth_bp.dashboard', status='Vacant') }}" class="card-link">
-                    <div class="card">
-                        <p>Total Vacant Bedspace</p>
-                        <span>{{ stats.vacant }}</span>
-                    </div>
-                </a>
-                <a href="{{ url_for('auth_bp.dashboard', status='Vacation') }}" class="card-link">
-                    <div class="card">
-                        <p>On Vacation</p>
-                        <span>{{ stats.on_vacation }}</span>
-                    </div>
-                </a>
-                <a href="{{ url_for('auth_bp.dashboard', status='Resigned') }}" class="card-link">
-                    <div class="card">
-                        <p>Resigned / Terminated</p>
-                        <span>{{ stats.resigned }}</span>
-                    </div>
-                </a>
+                <a href="{{ url_for('auth_bp.dashboard') }}" class="card-link"><div class="card"><p>Total Employees</p><span>{{ stats.total }}</span></div></a>
+                <a href="{{ url_for('auth_bp.dashboard', status='Vacant') }}" class="card-link"><div class="card"><p>Total Vacant Bedspace</p><span>{{ stats.vacant }}</span></div></a>
+                <a href="{{ url_for('auth_bp.dashboard', status='Vacation') }}" class="card-link"><div class="card"><p>On Vacation</p><span>{{ stats.on_vacation }}</span></div></a>
+                <a href="{{ url_for('auth_bp.dashboard', status='Resigned') }}" class="card-link"><div class="card"><p>Resigned / Terminated</p><span>{{ stats.resigned }}</span></div></a>
             </section>
 
             <section class="data-section">
                 <div class="main-data">
                     <div class="search-bar">
-                        <input type="text" placeholder="Search by SAP ID, Name...">
-                        <button>Search</button>
+                        <input type="text" id="searchInput" placeholder="Type to search SAP ID or Name..." value="{{ request.args.get('search', '') }}">
                     </div>
                     <div class="table-container">
                         <table>
@@ -92,7 +71,7 @@
                                     <th>Department</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="employeeTableBody">
                                 {% for emp in employees %}
                                 <tr>
                                     <td>{{ emp['Accommodation'] }}</td>
@@ -128,5 +107,35 @@
             </section>
         </main>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const tableBody = document.getElementById('employeeTableBody');
+            const tableRows = tableBody.getElementsByTagName('tr');
+
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    const filter = searchInput.value.toLowerCase();
+                    
+                    for (let i = 0; i < tableRows.length; i++) {
+                        const sapIdTd = tableRows[i].getElementsByTagName('td')[2];
+                        const nameTd = tableRows[i].getElementsByTagName('td')[3];
+                        
+                        if (sapIdTd && nameTd) {
+                            const sapIdText = sapIdTd.textContent || sapIdTd.innerText;
+                            const nameText = nameTd.textContent || nameTd.innerText;
+                            
+                            if (sapIdText.toLowerCase().indexOf(filter) > -1 || nameText.toLowerCase().indexOf(filter) > -1) {
+                                tableRows[i].style.display = "";
+                            } else {
+                                tableRows[i].style.display = "none";
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

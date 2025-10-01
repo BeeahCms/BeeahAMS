@@ -24,7 +24,6 @@
             <h1>Settings</h1>
         </div>
         <div class="header-right">
-             <a href="{{ url_for('auth_bp.dashboard') }}" class="back-btn">Back to Dashboard</a>
             <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2" class="header-logo">
         </div>
     </div>
@@ -40,6 +39,7 @@
                 <li><a href="{{ url_for('store_bp.store_report') }}">Store Record</a></li>
                 <li><a href="{{ url_for('contracts_bp.contracts_report') }}">Contracts</a></li>
                 <li class="active"><a href="{{ url_for('settings_bp.settings_page') }}">Setting</a></li>
+<li style="margin-top: 20px;"><a href="{{ url_for('auth_bp.logout') }}" class="logout-link">Logout</a></li>
             </ul>
         </nav>
 

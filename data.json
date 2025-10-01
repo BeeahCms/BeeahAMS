@@ -2,21 +2,21 @@
     {
         "Accommodation": "Sultan Accommodation",
         "Room": "Ag01",
-        "SAP ID": 14605.0,
-        "Emp Name": "Zakir",
-        "Designation": "IT Admin",
-        "Status": "Active",
-        "Department": "Tandeef",
-        "Nationality": "Pakistan"
+        "SAP ID": "",
+        "Emp Name": "",
+        "Designation": "",
+        "Department": "",
+        "Status": "Vacant",
+        "Nationality": ""
     },
     {
         "Accommodation": "Basma Accommodation",
         "Room": "Ag02",
-        "SAP ID": 14606.0,
-        "Emp Name": "Rabani",
-        "Designation": "Camp Amdin",
-        "Status": "Vacation",
-        "Department": "Tadweer",
+        "SAP ID": 14605.0,
+        "Emp Name": "Zakir",
+        "Designation": "IT Admin",
+        "Department": "Tandeef",
+        "Status": "Active",
         "Nationality": "Pakistan"
     },
     {
@@ -25,8 +25,8 @@
         "SAP ID": 14607.0,
         "Emp Name": "Sagar",
         "Designation": "Camp Boss",
-        "Status": "Active",
         "Department": "Salamatq",
+        "Status": "Active",
         "Nationality": "India"
     },
     {
@@ -35,8 +35,8 @@
         "SAP ID": 14608.0,
         "Emp Name": "Ijaz",
         "Designation": "Coordinator",
-        "Status": "Active",
         "Department": "Salamatq",
+        "Status": "Active",
         "Nationality": "India"
     },
     {
@@ -45,18 +45,128 @@
         "SAP ID": 14609.0,
         "Emp Name": "Naveen",
         "Designation": "Labor",
-        "Status": "Resigned",
         "Department": "Salamatq",
+        "Status": "Resigned",
         "Nationality": "India"
     },
     {
         "Accommodation": "Ajman Accommodation",
         "Room": "Ag10",
-        "SAP ID": "",
-        "Emp Name": "",
-        "Designation": "",
-        "Status": "Vacant",
-        "Department": "",
-        "Nationality": ""
+        "SAP ID": 14610.0,
+        "Emp Name": "Zakir",
+        "Designation": "IT Admin",
+        "Department": "Tandeef",
+        "Status": "Active",
+        "Nationality": "Pakistan"
+    },
+    {
+        "Accommodation": "Khorfakkan Accommodation",
+        "Room": "BF01",
+        "SAP ID": 14611.0,
+        "Emp Name": "Sagar",
+        "Designation": "Camp Boss",
+        "Department": "Salamatq",
+        "Status": "Active",
+        "Nationality": "India"
+    },
+    {
+        "Accommodation": "Khorfakkan Accommodation",
+        "Room": "Ag11",
+        "SAP ID": 14612.0,
+        "Emp Name": "Ijaz",
+        "Designation": "Coordinator",
+        "Department": "Salamatq",
+        "Status": "Active",
+        "Nationality": "India"
+    },
+    {
+        "Accommodation": "Khorfakkan Accommodation",
+        "Room": "BF02",
+        "SAP ID": 14613.0,
+        "Emp Name": "Naveen",
+        "Designation": "Labor",
+        "Department": "Salamatq",
+        "Status": "Resigned",
+        "Nationality": "India"
+    },
+    {
+        "Accommodation": "Khorfakkan Accommodation",
+        "Room": "Ag12",
+        "SAP ID": 14614.0,
+        "Emp Name": "Zakir",
+        "Designation": "IT Admin",
+        "Department": "Tandeef",
+        "Status": "Active",
+        "Nationality": "Pakistan"
+    },
+    {
+        "Accommodation": "Khorfakkan Accommodation",
+        "Room": "BF03",
+        "SAP ID": 14615.0,
+        "Emp Name": "Sagar",
+        "Designation": "Camp Boss",
+        "Department": "Salamatq",
+        "Status": "Active",
+        "Nationality": "India"
+    },
+    {
+        "Accommodation": "Khorfakkan Accommodation",
+        "Room": "Ag13",
+        "SAP ID": 14616.0,
+        "Emp Name": "Ijaz",
+        "Designation": "Coordinator",
+        "Department": "Salamatq",
+        "Status": "Active",
+        "Nationality": "India"
+    },
+    {
+        "Accommodation": "Al Dhaid Accommodation",
+        "Room": "BF04",
+        "SAP ID": 14617.0,
+        "Emp Name": "Naveen",
+        "Designation": "Labor",
+        "Department": "Salamatq",
+        "Status": "Resigned",
+        "Nationality": "India"
+    },
+    {
+        "Accommodation": "New Sajja Accommodation",
+        "Room": "Ag14",
+        "SAP ID": 14618.0,
+        "Emp Name": "Zakir",
+        "Designation": "IT Admin",
+        "Department": "Tandeef",
+        "Status": "Active",
+        "Nationality": "Pakistan"
+    },
+    {
+        "Accommodation": "Al Qouz Accommodation",
+        "Room": "BF05",
+        "SAP ID": 14619.0,
+        "Emp Name": "Sagar",
+        "Designation": "Camp Boss",
+        "Department": "Salamatq",
+        "Status": "Active",
+        "Nationality": "India"
+    },
+    {
+        "Accommodation": "Maliha Accommodation",
+        "Room": "Ag15",
+        "SAP ID": 14620.0,
+        "Emp Name": "Ijaz",
+        "Designation": "Coordinator",
+        "Department": "Salamatq",
+        "Status": "Active",
+        "Nationality": "India"
+    },
+    {
+        "Accommodation": "New Sajja Accommodation",
+        "Room": "BF06",
+        "SAP ID": 14621.0,
+        "Emp Name": "Naveen",
+        "Designation": "Labor",
+        "Department": "Salamatq",
+        "Status": "Resigned",
+        "Nationality": "India"
     }
 ]

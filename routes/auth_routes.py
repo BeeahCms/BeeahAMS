@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from routes.staff_routes import all_employees
+from routes.settings_routes import load_users
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -11,11 +12,18 @@ def login():
 def login_action():
     username = request.form.get('username')
     password = request.form.get('password')
-    # This should be replaced with your actual user loading logic
-    if username == 'admin' and password == 'password123':
-        session['username'] = username
-        session['role'] = 'Admin' # Example role
-        session['allowed_accommodations'] = [] # Example
+    users = load_users()
+    
+    user_found = None
+    for user in users:
+        if user.get('username') == username and user.get('password') == password:
+            user_found = user
+            break
+            
+    if user_found:
+        session['username'] = user_found['username']
+        session['role'] = user_found.get('role', 'User') # Default role if not specified
+        session['allowed_accommodations'] = user_found.get('allowed_accommodations', [])
         return redirect(url_for('auth_bp.dashboard'))
     else:
         flash('Invalid username or password. Please try again.')
@@ -70,7 +78,6 @@ def dashboard():
 
 @auth_bp.route('/logout')
 def logout():
-    session.pop('username', None)
-    session.pop('role', None)
-    session.pop('allowed_accommodations', None)
+    session.clear()
+    flash("You have been logged out.")
     return redirect(url_for('auth_bp.login'))
